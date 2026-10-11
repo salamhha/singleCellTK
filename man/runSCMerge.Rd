@@ -17,17 +17,17 @@ runSCMerge(
 )
 }
 \arguments{
-\item{inSCE}{Input \linkS4class{SingleCellExperiment} object}
+\item{inSCE}{Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object}
 
 \item{useAssay}{A single character indicating the name of the assay requiring
 batch correction. Default \code{"logcounts"}.}
 
 \item{batch}{A single character indicating a field in
-\code{\link{colData}} that annotates the batches.
+\code{\link[SummarizedExperiment]{colData}} that annotates the batches.
 Default \code{"batch"}.}
 
 \item{assayName}{A single characeter. The name for the corrected assay. Will
-be saved to \code{\link{assay}}. Default \code{"scMerge"}.}
+be saved to \code{\link[SummarizedExperiment]{assay}}. Default \code{"scMerge"}.}
 
 \item{hvgExprs}{A single characeter. The assay that to be used for highly
 variable genes identification. Default \code{"counts"}.}
@@ -49,17 +49,24 @@ auto-detected by default, depending on \code{cellType}.}
 \code{colData(inSCE)} that defines different cell types. Default
 \code{'cell_type'}.}
 
-\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether
+\item{BPPARAM}{A \link[BiocParallel:BiocParallelParam-class]{BiocParallelParam} object specifying whether
 should be parallelized. Default \code{BiocParallel::SerialParam()}.}
 }
 \value{
-The input \linkS4class{SingleCellExperiment} object with
+The input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object with
 \code{assay(inSCE, assayName)} updated.
 }
 \description{
 The scMerge method leverages factor analysis, stably expressed genes (SEGs)
 and (pseudo-) replicates to remove unwanted variations and merge multiple
 scRNA-Seq data.
+}
+\details{
+The \code{scMerge} package is suggested rather than required, so
+it is not installed with singleCellTK. Install it with
+\code{BiocManager::install("scMerge")} before calling this function; it is
+unavailable on some platforms, and making it a hard dependency would block
+installing singleCellTK there.
 }
 \examples{
 data('sceBatches', package = 'singleCellTK')

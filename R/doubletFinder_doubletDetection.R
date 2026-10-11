@@ -171,14 +171,35 @@
   if (nrow(seu[[]]) > 10000) {
     real.cells <- rownames(seu[[]])[sample(seq(nrow(seu[[]])),
                                            10000, replace = FALSE)]
-    data <- Seurat::GetAssayData(seu, slot = "counts", 
-                                 assay = "RNA")[, real.cells]
+  
+    # Check the installed Seurat version
+    seurat_version <- packageVersion("SeuratObject")$major
+    
+    if (seurat_version >= 5) {
+      # Code for Seurat v5+ (uses 'layer')
+      data <- SeuratObject::LayerData(seu, layer = "counts", assay = "RNA")[, real.cells]
+    } else {
+      # Code for Seurat v4 and older (uses 'slot')
+      data <- SeuratObject::GetAssayData(seu, slot = "counts", assay = "RNA")[, real.cells]
+    }
+    
     n.real.cells <- ncol(data)
   }
   
   if (ncol(seu) <= 10000) {
     real.cells <- colnames(seu)
-    data <- Seurat::GetAssayData(seu, slot = "counts", assay = "RNA")
+    
+    # Check the installed Seurat version
+    seurat_version <- packageVersion("SeuratObject")$major
+    
+    if (seurat_version >= 5) {
+      # Code for Seurat v5+ (uses 'layer')
+      data <- SeuratObject::LayerData(seu, layer = "counts", assay = "RNA")
+    } else {
+      # Code for Seurat v4 and older (uses 'slot')
+      data <- SeuratObject::GetAssayData(seu, slot = "counts", assay = "RNA")
+    }
+    
     n.real.cells <- ncol(data)
   }
   ## Iterate through pN, computing pANN vectors at varying pK
@@ -269,9 +290,18 @@
   allGenes <- rownames(seurat)
   seurat <- Seurat::ScaleData(seurat, features = allGenes, verbose = verbose)
   
-  numPc <- min(nrow(Seurat::GetAssayData(seurat, slot = "scale.data", 
-                                         assay = "RNA")) - 1, 
-               50)
+  # Check the installed Seurat version
+  seurat_version <- packageVersion("SeuratObject")$major
+  
+  if (seurat_version >= 5) {
+    # Code for Seurat v5+ (uses 'layer')
+    temp <- SeuratObject::LayerData(seurat, layer = "scale.data", assay = "RNA")
+  } else {
+    # Code for Seurat v4 and older (uses 'slot')
+    temp <- SeuratObject::GetAssayData(seurat, slot = "scale.data", assay = "RNA")
+  }
+  numPc <- min(nrow(temp) - 1, 50)
+  
   seurat <- Seurat::RunPCA(seurat,
                            features =
                              Seurat::VariableFeatures(object = seurat),
@@ -317,7 +347,7 @@
 #' @title Generates a doublet score for each cell via doubletFinder
 #' @description Uses doubletFinder to determine cells within the dataset
 #'  suspected to be doublets.
-#' @param inSCE inSCE A \linkS4class{SingleCellExperiment} object.
+#' @param inSCE inSCE A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param sample Character vector or colData variable name. Indicates which 
 #' sample each cell belongs to. Default \code{NULL}.
 #' @param useAssay  A string specifying which assay in the SCE to use. Default 
@@ -338,7 +368,7 @@
 #' \code{NULL}.
 #' @param verbose Boolean. Wheter to print messages from Seurat and 
 #' DoubletFinder. Default \code{FALSE}.
-#' @return \linkS4class{SingleCellExperiment} object containing the
+#' @return \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object containing the
 #' \code{doublet_finder_doublet_score} variable in \code{colData} slot.
 #' @seealso \code{\link{runCellQC}}, \code{\link{plotDoubletFinderResults}}
 #' @examples
@@ -614,8 +644,18 @@ runDoubletFinder <- function(inSCE,
   if (reuse.pANN == FALSE) {
     ## Make merged real-artifical data
     real.cells <- colnames(seu)
-    data <- Seurat::GetAssayData(seu, slot = "counts", 
-                                 assay = "RNA")[, real.cells]
+    
+    # Check the installed Seurat version
+    seurat_version <- packageVersion("SeuratObject")$major
+    
+    if (seurat_version >= 5) {
+      # Code for Seurat v5+ (uses 'layer')
+      data <- SeuratObject::LayerData(seu, layer = "counts", assay = "RNA")[, real.cells]
+    } else {
+      # Code for Seurat v4 and older (uses 'slot')
+      data <- SeuratObject::GetAssayData(seu, slot = "counts", assay = "RNA")[, real.cells]
+    }
+    
     n_real.cells <- length(real.cells)
     n_doublets <- round(n_real.cells/(1 - pN) - n_real.cells)
     if (verbose) {

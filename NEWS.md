@@ -1,3 +1,110 @@
+Changes in Version 2.23.6 (2026-10-08)
+================================================================================
+* Help pages link to other packages' topics with package anchors (for example
+  \link[SummarizedExperiment]{colData}), as R CMD check and Bioconductor now
+  require. No change to functionality.
+
+Changes in Version 2.23.5 (2026-10-08)
+================================================================================
+* runFastMNN() hides deprecation warnings raised inside batchelor's
+  fastMNN() and reducedMNN(), as runMNNCorrect() already did for
+  mnnCorrect(). batchelor still calls deprecated scuttle functions. Other
+  warnings are unchanged.
+
+Changes in Version 2.23.4 (2026-10-07)
+================================================================================
+* Fixed feature selection on the Celda tab of the Shiny app. Both the
+  Scran_modelGeneVar and SeuratFindHVG options failed: the first called a
+  function that does not exist, the second was never run because its option
+  value did not match, and both requested the top genes with an argument
+  that getTopHVG() does not accept. With SeuratFindHVG, only the vst method
+  works with Seurat 5. The selected genes are now stored in the
+  featureSubset alternative experiment used by Celda; the main dataset keeps
+  all genes, as with the None option, instead of being reduced to them.
+* Fixed starting the Shiny app with data, singleCellTK(inSCE = sce), which
+  failed for any object without alternative experiments.
+* The SoupX help page in the app describes the new clustering method.
+
+Changes in Version 2.23.3 (2026-10-07)
+================================================================================
+* runModelGeneVar() now models gene variances with
+  scrapper::modelGeneVariances() instead of the deprecated
+  scran::modelGeneVar(). Means and total variances are unchanged, but the
+  biological component comes from a different trend fit, so the ranking of
+  highly variable genes changes (about 90-97% of the top 500 genes are the
+  same on the test datasets). Results that depend on modelGeneVar HVGs, such
+  as PCA, UMAP, and clusters, can change.
+* runSoupX() clusters cells (when no clusters are supplied) with the steps of
+  scran::quickCluster(), computed with scrapper and bluster. The automatic
+  clusters, and therefore SoupX's contamination estimates, can change
+  slightly.
+
+Changes in Version 2.23.2 (2026-10-07)
+================================================================================
+* Replaced functions deprecated in scuttle 1.22 and scran 1.40. Results are
+  unchanged (identical, or within floating-point error):
+  * runClusterSummaryMetrics(), plotSCEHeatmap(), and the TSCAN functions
+    aggregate with scrapper or base R instead of
+    scuttle::aggregateAcrossCells().
+  * scaterlogNormCounts() normalizes with scrapper::normalizeRnaCounts.se().
+  * runPerCellQC() and sampleSummaryStats() compute the per-cell QC metrics
+    with scrapper::computeRnaQcMetrics() and singleCellTK code (for the
+    top-N, gene-set, and altExp columns) instead of scater::addPerCellQC().
+    This is about 4 times faster on large data. runPerCellQC() uses BPPARAM
+    to set the number of threads. The metadata packageVersion recorded by
+    runPerCellQC() is now singleCellTK's.
+  * runScranSNN() builds graphs with bluster::makeSNNGraph().
+  * runWilcox() uses an internal Wilcoxon rank-sum test, the same test
+    scran::pairwiseWilcox() performed.
+* New dependencies: scrapper, bluster, and BiocSingular. scuttle is no longer
+  imported directly.
+* runMNNCorrect() hides deprecation warnings raised inside
+  batchelor::mnnCorrect(), which still calls deprecated scuttle functions.
+  Other warnings are unchanged.
+* Fixed plotSCEHeatmap() with aggregateRow, which always failed.
+* Fixed runScranSNN() with useAltExp and altExpRedDim, which always failed.
+
+Changes in Version 2.23.1 (2026-10-06)
+================================================================================
+* runDecontX() now calls the decontX package directly instead of going
+  through celda. Since celda 1.23.0, celda::decontX() requires decontX to be
+  installed, which made runDecontX() and runCellQC() fail where it was not.
+  decontX is now imported, and the run metadata records the decontX version.
+  Results are unchanged. Note that decontX 1.11 initializes its cell clusters
+  with scrapper, so contamination estimates can differ slightly from earlier
+  Bioconductor releases.
+* Moved scMerge from Imports to Suggests. It is only used by runSCMerge(), and
+  it cannot currently be installed on all platforms (an unrelated toolchain
+  problem in one of its dependencies), which blocked installing singleCellTK
+  there entirely. runSCMerge() now stops with an informative message if scMerge
+  is not installed.
+* Fixed runHarmony() with harmony >= 1.0.0, where HarmonyMatrix() was removed.
+  The function now detects the installed harmony version and calls RunHarmony()
+  on 1.0.0 and above, while keeping the original HarmonyMatrix() code path for
+  older installations. With harmony >= 1.0.0 the PCA for a full-size assay is
+  computed by singleCellTK, since harmony no longer performs it, using all
+  features of the selected assay with scaling so that it matches the PCA the
+  legacy interface performed internally. Corrected embeddings are not expected
+  to match between harmony versions. After upgrading harmony, the legacy
+  tuning arguments (tau, block.size, max.iter.cluster, epsilon.cluster,
+  epsilon.harmony) are no longer accepted through '...'; harmony raises an
+  error for them, and they must be passed through
+  .options = harmony::harmony_options(...) instead.
+* Changed `runScDblFinder()` defaults for `nNeighbors` and `simDoublets` to
+  `NULL`, so scDblFinder chooses these values itself
+
+Changes in Version 2.21.1 (2026-01-1)
+================================================================================
+* Updated depreciated parameters in Seurat function calls
+
+Changes in Version 2.20.0 (2025-10-29)
+================================================================================
+* Updated version to match Bioconductor 3.22
+
+Changes in Version 2.18.1 (2025-07-01)
+================================================================================
+* Updated enrichR examples
+
 Changes in Version 2.18.0 (2025-04-15)
 ================================================================================
 * Updated call to msigdbr to work with newer version

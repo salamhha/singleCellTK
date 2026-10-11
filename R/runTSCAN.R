@@ -4,7 +4,7 @@
 #' @title getTSCANResults accessor function
 #' @description SCTK allows user to access all TSCAN related results with
 #' \code{"getTSCANResults"}. See details.
-#' @param x Input \linkS4class{SingleCellExperiment} object.
+#' @param x Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param analysisName Algorithm name implemented, should be one of
 #' \code{"Pseudotime"}, \code{"DEG"}, or \code{"ClusterDEAnalysis"}.
 #' @param pathName Sub folder name within the \code{analysisName}. See details.
@@ -124,7 +124,7 @@ setMethod("listTSCANTerminalNodes", signature(x = "SingleCellExperiment"),
 #' @title Run TSCAN to obtain pseudotime values for cells
 #' @description Wrapper for obtaining a pseudotime ordering of the cells by
 #' projecting them onto the minimum spanning tree (MST)
-#' @param inSCE Input \linkS4class{SingleCellExperiment} object.
+#' @param inSCE Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param useReducedDim Character. A low-dimension representation in
 #' \code{reducedDims}, will be used for both clustering if \code{cluster} not
 #' specified and MST construction. Default \code{"PCA"}.
@@ -164,8 +164,7 @@ runTSCAN <- function(inSCE,
     }
     message(date(), " ... Running TSCAN to estimate pseudotime")
     inSCE <- scran::computeSumFactors(inSCE, clusters = cluster)
-    by.cluster <- scuttle::aggregateAcrossCells(inSCE, ids = cluster)
-    centroids <- SingleCellExperiment::reducedDim(by.cluster, useReducedDim)
+    centroids <- .clusterCentroids(inSCE, cluster, useReducedDim)
     mst <- TSCAN::createClusterMST(centroids, clusters = NULL)
 
     # Map each cell to the closest edge on the MST, reporting also the distance to
@@ -230,7 +229,7 @@ runTSCAN <- function(inSCE,
 #' @description A wrapper function which visualizes outputs from the
 #' \code{\link{runTSCAN}} function. Plots the pseudotime ordering of the cells
 #' and project them onto the MST.
-#' @param inSCE Input \linkS4class{SingleCellExperiment} object.
+#' @param inSCE Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param useReducedDim Saved dimension reduction name in \code{inSCE} object.
 #' Required.
 #' @return A \code{.ggplot} object with the pseudotime ordering of the cells
@@ -247,9 +246,9 @@ plotTSCANResults <- function(inSCE, useReducedDim = "UMAP") {
 
     results <- getTSCANResults(inSCE, analysisName = "Pseudotime")
     clusters <- colData(inSCE)$TSCAN_clusters
-    by.cluster <- scuttle::aggregateAcrossCells(inSCE, ids = clusters)
-    line.data <- TSCAN::reportEdges(by.cluster, mst = results$mst,
-                                    clusters = NULL, use.dimred = useReducedDim)
+    centroids <- .clusterCentroids(inSCE, clusters, useReducedDim)
+    line.data <- TSCAN::reportEdges(centroids, mst = results$mst,
+                                    clusters = NULL)
 
     scater::plotReducedDim(inSCE, dimred = useReducedDim,
                            colour_by = I(colData(inSCE)$TSCAN_pseudotime),
@@ -267,7 +266,7 @@ plotTSCANResults <- function(inSCE, useReducedDim = "UMAP") {
 #' @title Test gene expression changes along a TSCAN trajectory path
 #' @description Wrapper for identifying genes with significant changes with
 #' respect to one of the TSCAN pseudotime paths
-#' @param inSCE Input \linkS4class{SingleCellExperiment} object.
+#' @param inSCE Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param pathIndex Path index for which the pseudotime values should be used.
 #' This corresponds to the terminal node of specific path from the root
 #' node to the terminal node. Run \code{listTSCANTerminalNodes(inSCE)} for
@@ -325,7 +324,7 @@ runTSCANDEG <- function(inSCE,
 #' expression with increasing pseudotime along the path in the MST.
 #' \code{\link{runTSCANDEG}} has to be run in advance with using the same
 #' \code{pathIndex} of interest.
-#' @param inSCE Input \linkS4class{SingleCellExperiment} object.
+#' @param inSCE Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param pathIndex Path index for which the pseudotime values should be used.
 #' Should have being used in \code{\link{runTSCANDEG}}.
 #' @param direction Should we show features with expression increasing or
@@ -457,7 +456,7 @@ plotTSCANPseudotimeHeatmap <- function(inSCE,
 #' in expression with increasing pseudotime along the path in the MST.
 #' \code{\link{runTSCANDEG}} has to be run in advance with using the same
 #' \code{pathIndex} of interest.
-#' @param inSCE Input \linkS4class{SingleCellExperiment} object.
+#' @param inSCE Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param pathIndex Path index for which the pseudotime values should be used.
 #' Should have being used in \code{\link{runTSCANDEG}}.
 #' @param direction Should we show features with expression increasing or
@@ -531,7 +530,7 @@ plotTSCANPseudotimeGenes <- function(inSCE,
 #' in the other paths. Using a branching cluster (i.e. a node with degree > 2)
 #' may highlight features which are responsible for the branching event. MST has
 #' to be pre-calculated with \code{\link{runTSCAN}}.
-#' @param inSCE Input \linkS4class{SingleCellExperiment} object.
+#' @param inSCE Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param useCluster The cluster to be regarded as the root, has to existing in
 #' \code{colData(inSCE)$TSCAN_clusters}.
 #' @param useAssay Character. The name of the assay to use. This assay should
@@ -620,7 +619,7 @@ runTSCANClusterDEAnalysis <- function(inSCE,
 #' \code{useCluster}. For each path, this function plots the recomputed
 #' pseudotime starting from the root on a scatter plot which contains cells only
 #' in this cluster. MST has to be pre-calculated with \code{\link{runTSCAN}}.
-#' @param inSCE Input \linkS4class{SingleCellExperiment} object.
+#' @param inSCE Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param useCluster The cluster to be regarded as the root, has to existing in
 #' \code{colData(inSCE)$TSCAN_clusters}.
 #' @param useReducedDim Saved dimension reduction name in the
@@ -647,9 +646,9 @@ plotTSCANClusterPseudo <- function(inSCE, useCluster, useReducedDim = "UMAP",
     results <- getTSCANResults(inSCE, analysisName = "Pseudotime")
     combinePlot <- match.arg(combinePlot)
     clusters <- colData(inSCE)$TSCAN_clusters
-    by.cluster <- scuttle::aggregateAcrossCells(inSCE, ids = clusters)
-    line.data <- TSCAN::reportEdges(by.cluster, mst = results$mst,
-                                    clusters = NULL, use.dimred = useReducedDim)
+    centroids <- .clusterCentroids(inSCE, clusters, useReducedDim)
+    line.data <- TSCAN::reportEdges(centroids, mst = results$mst,
+                                    clusters = NULL)
     line.data.sub <- .getClustersLineData(line.data, useCluster)
 
     # Get Branch pseudotime
@@ -686,7 +685,7 @@ plotTSCANClusterPseudo <- function(inSCE, useCluster, useReducedDim = "UMAP",
 #' @description A wrapper function which plot the top features expression
 #' identified by \code{\link{runTSCANClusterDEAnalysis}} on the 2D embedding of
 #' the cells cluster used in the analysis. The related MST edges are overlaid.
-#' @param inSCE Input \linkS4class{SingleCellExperiment} object.
+#' @param inSCE Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param useCluster Choose a cluster used for identifying DEG with
 #' \code{\link{runTSCANClusterDEAnalysis}}. Required.
 #' @param pathIndex Specifies one of the branching paths from \code{useCluster}
@@ -758,7 +757,7 @@ plotTSCANClusterDEG <- function(
 #' @description A wrapper function which plots all cells or cells in chosen
 #' cluster. Each point is a cell colored by the expression of a feature of
 #' interest, the relevant edges of the MST are overlaid on top.
-#' @param inSCE Input \linkS4class{SingleCellExperiment} object.
+#' @param inSCE Input \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.
 #' @param features Choose the feature of interest to explore the expression
 #' level on the trajectory. Required.
 #' @param useReducedDim A single character for the matrix of 2D embedding.
@@ -802,9 +801,9 @@ plotTSCANDimReduceFeatures <- function(
     results <- getTSCANResults(inSCE, analysisName = "Pseudotime")
     combinePlot <- match.arg(combinePlot)
     clusters <- colData(inSCE)$TSCAN_clusters
-    by.cluster <- scuttle::aggregateAcrossCells(inSCE, ids = clusters)
-    line.data <- TSCAN::reportEdges(by.cluster, mst = results$mst,
-                                    clusters = NULL, use.dimred = useReducedDim)
+    centroids <- .clusterCentroids(inSCE, clusters, useReducedDim)
+    line.data <- TSCAN::reportEdges(centroids, mst = results$mst,
+                                    clusters = NULL)
     if (!is.null(useCluster)) {
         line.data <- .getClustersLineData(line.data, useCluster)
         inSCE <- inSCE[, clusters %in% useCluster]
@@ -814,7 +813,7 @@ plotTSCANDimReduceFeatures <- function(
     features <- stats::na.omit(features)
     for (f in features) {
         # Should not enter the loop if features is length zero after NA omit
-        g <- plotSCEDimReduceFeatures(inSCE, feature = f,
+        g <- plotSCEDimReduceFeatures(inSCE, features = f,
                                       useAssay = useAssay,
                                       featureLocation = by,dim1 = 1, dim2 = 2,
                                       featureDisplay = featureDisplay,

@@ -29,7 +29,7 @@ runSoupX(
 )
 }
 \arguments{
-\item{inSCE}{A \linkS4class{SingleCellExperiment} object.}
+\item{inSCE}{A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.}
 
 \item{sample}{A single character specifying a name that can be found in
 \code{colData(inSCE)} to directly use the cell annotation; or a character
@@ -41,18 +41,18 @@ belongs to. SoupX will be run on cells from each sample separately. Default
 \code{inSCE} to use. Default \code{'counts'}.}
 
 \item{background}{A numeric matrix of counts or a
-\linkS4class{SingleCellExperiment} object with the matrix in \code{assay}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object with the matrix in \code{assay}
 slot. It should have the same structure as \code{inSCE} except it contains
 the matrix including empty droplets. Default \code{NULL}.}
 
 \item{bgAssayName}{A single character string specifying which assay in
 \code{background} to use when \code{background} is a
-\linkS4class{SingleCellExperiment} object. If \code{NULL}, the function
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. If \code{NULL}, the function
 will use the same value as \code{useAssay}. Default \code{NULL}.}
 
 \item{bgBatch}{The same thing as \code{sample} but for \code{background}. Can
 be a single character only when \code{background} is a
-\linkS4class{SingleCellExperiment} object. Default \code{NULL}.}
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object. Default \code{NULL}.}
 
 \item{assayName}{A single character string of the output corrected matrix.
 Default \code{"SoupX"} when not using a background, otherwise,
@@ -61,7 +61,9 @@ Default \code{"SoupX"} when not using a background, otherwise,
 \item{cluster}{Prior knowledge of clustering labels on cells. A single
 character string for specifying clustering label stored in
 \code{colData(inSCE)}, or a character vector with as many elements as cells.
-When not supplied, \code{\link[scran]{quickCluster}} method will be applied.}
+When not supplied, cells are clustered with the steps of
+\code{scran::quickCluster} (method "igraph"), computed with scrapper and
+bluster.}
 
 \item{reducedDimName}{A single character string of the prefix of output
 corrected embedding matrix for each sample. Default \code{"SoupX_UMAP_"} when

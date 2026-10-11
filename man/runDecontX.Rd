@@ -30,7 +30,7 @@ runDecontX(
 \item{sample}{A single character specifying a name that can be found in
 \code{colData(inSCE)} to directly use the cell annotation; or a character
 vector with as many elements as cells to indicates which sample each cell
-belongs to. Default NULL. \link[celda]{decontX} will be run on cells from
+belongs to. Default NULL. \link[decontX]{decontX} will be run on cells from
 each sample separately.}
 
 \item{useAssay}{A string specifying which assay in the SCE to use. Default
@@ -111,11 +111,11 @@ a default value of 12345 is used. If NULL, no calls to
 \value{
 A \link[SingleCellExperiment]{SingleCellExperiment} object with
  'decontX_Contamination' and 'decontX_Clusters' added to the
- \link{colData} slot. Additionally, the
+ \link[SummarizedExperiment]{colData} slot. Additionally, the
 decontaminated counts will be added as an assay called 'decontXCounts'.
 }
 \description{
-A wrapper function for \link[celda]{decontX}. Identify
+A wrapper function for \link[decontX]{decontX}. Identify
  potential contamination from experimental factors such as ambient RNA.
 }
 \examples{

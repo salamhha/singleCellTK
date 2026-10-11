@@ -6,6 +6,7 @@
 \usage{
 reportCellQC(
   inSCE,
+  sample = "sample",
   output_file = NULL,
   output_dir = NULL,
   subTitle = NULL,
@@ -17,6 +18,8 @@ reportCellQC(
 \item{inSCE}{A \link[SingleCellExperiment]{SingleCellExperiment} object containing
 the filtered count matrix with the output from runCellQC function}
 
+\item{sample}{Character. The name of the saved column from the colData indicating the sample grouping variable. Default is "sample"}
+
 \item{output_file}{Character. The name of the generated file. If NULL/default then the output file name will be based on the name of the Rmarkdown template.}
 
 \item{output_dir}{Character. The name of the output directory to save the rendered file. If NULL/default the file is stored to the current working directory}
@@ -26,7 +29,7 @@ the filtered count matrix with the output from runCellQC function}
 \item{studyDesign}{Character. The description of the data set and experiment design. It would be shown at the top of QC HTML report. Default is NULL.}
 
 \item{useReducedDim}{Character. The name of the saved dimension reduction slot including cells
-from all samples in then\linkS4class{SingleCellExperiment} object, Default is NULL}
+from all samples in then\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object, Default is NULL}
 }
 \value{
 .html file

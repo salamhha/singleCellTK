@@ -2,7 +2,7 @@
 % Please edit documentation in R/runPerCellQC.R
 \name{runPerCellQC}
 \alias{runPerCellQC}
-\title{Wrapper for calculating QC metrics with scater.}
+\title{Calculate per-cell QC metrics}
 \usage{
 runPerCellQC(
   inSCE,
@@ -24,7 +24,7 @@ runPerCellQC(
 )
 }
 \arguments{
-\item{inSCE}{A \linkS4class{SingleCellExperiment} object.}
+\item{inSCE}{A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment} object.}
 
 \item{useAssay}{A string specifying which assay in the SCE to use. Default
 \code{"counts"}.}
@@ -104,17 +104,20 @@ used. Default \code{FALSE}.}
 \item{detectionLimit}{A numeric scalar specifying the lower detection limit
 for expression. Default \code{0}}
 
-\item{BPPARAM}{A \link{BiocParallelParam} object specifying whether the QC
+\item{BPPARAM}{A \link[BiocParallel]{BiocParallelParam} object specifying whether the QC
 calculations should be parallelized. Default 
 \code{BiocParallel::SerialParam()}.}
 }
 \value{
 A \link[SingleCellExperiment]{SingleCellExperiment} object with
-cell QC metrics added to the \link{colData} slot.
+cell QC metrics added to the \link[SummarizedExperiment]{colData} slot.
 }
 \description{
-A wrapper function for \link[scater]{addPerCellQC}. Calculate
-general quality control metrics for each cell in the count matrix.
+Calculates general quality control metrics for each cell in
+the count matrix: total counts, detected features, percent of counts in
+the top features, and the same metrics for gene sets (such as mitochondrial
+genes) and alternative experiments. The metrics and column names are the
+same as those of \code{scater::addPerCellQC}, which is deprecated.
 }
 \details{
 This function allows multiple ways to import mitochondrial genes and quantify 
@@ -142,6 +145,5 @@ geneSet <- list("Mito"=rownames(sce)[mito.ix])
 sce <- runPerCellQC(sce, geneSetList = geneSet)
 }
 \seealso{
-\code{\link[scater]{addPerCellQC}}, 
 \code{link{plotRunPerCellQCResults}}, \code{\link{runCellQC}}
 }
